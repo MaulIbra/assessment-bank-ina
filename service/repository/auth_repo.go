@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -9,7 +10,7 @@ import (
 
 type IAuthRepo interface {
 	GenerateJWT(userId int, email, password string) (string, error)
-	ClaimToken(token string) error
+	ClaimToken(token string) (map[string]interface{}, error)
 }
 
 type authRepo struct {
@@ -21,15 +22,14 @@ type authRepo struct {
 func (a authRepo) GenerateJWT(userId int, email, password string) (string, error) {
 	claims := a.jwt.Claims.(jwt.MapClaims)
 	claims["authorized"] = true
-	claims["user_id"] = userId
+	claims["user_id"] = strconv.Itoa(userId)
 	claims["email"] = email
 	claims["password"] = password
 	claims["exp"] = time.Now().Add(time.Minute * time.Duration(a.expiredToken)).Unix()
 	return a.jwt.SignedString(a.signingKey)
 }
 
-func (a authRepo) ClaimToken(token string) error {
-
+func (a authRepo) ClaimToken(token string) (map[string]interface{}, error) {
 	tempToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("there was an error in parsing")
@@ -37,13 +37,13 @@ func (a authRepo) ClaimToken(token string) error {
 		return a.signingKey, nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, ok := tempToken.Claims.(jwt.MapClaims)
+	claim, ok := tempToken.Claims.(jwt.MapClaims)
 	if ok && tempToken.Valid {
-		return nil
+		return claim, nil
 	}
-	return fmt.Errorf("not Authorize")
+	return nil, fmt.Errorf("not Authorize")
 }
 
 func NewAuthRepository(jwt *jwt.Token, signingKey []byte, expiredToken int) IAuthRepo {
