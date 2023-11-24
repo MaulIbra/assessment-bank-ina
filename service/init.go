@@ -40,8 +40,12 @@ func Init() *gin.Engine {
 	iUserRepo := repository.NewUserRepo(db)
 	iUserUsecase := usecase.NewUserUsecase(iUserRepo, passSecret)
 
+	iTaskRepo := repository.NewTaskRepo(db)
+	iTaskUsecase := usecase.NewTaskUsecase(iTaskRepo)
+
 	interactor := interactor.Interactor{
 		UserUsecase: iUserUsecase,
+		TaskUsecase: iTaskUsecase,
 		AuthRepo:    iAuthRepo,
 	}
 	interactor.Routes(v1)

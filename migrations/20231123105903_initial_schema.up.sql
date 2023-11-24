@@ -31,16 +31,16 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `assessment_bank_ina`.`tasks` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `users_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT NOT NULL,
   `status` VARCHAR(50) NOT NULL DEFAULT 'PENDING',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `fk_tasks_users_idx` (`users_id` ASC),
+  INDEX `fk_tasks_user_idx` (`user_id` ASC),
   CONSTRAINT `fk_tasks_users`
-    FOREIGN KEY (`users_id`)
+    FOREIGN KEY (`user_id`)
     REFERENCES `assessment_bank_ina`.`users` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)

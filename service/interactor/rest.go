@@ -10,6 +10,7 @@ import (
 
 type Interactor struct {
 	UserUsecase usecase.IUserUsecase
+	TaskUsecase usecase.ITaskUsecase
 	AuthRepo    repository.IAuthRepo
 }
 
@@ -38,9 +39,15 @@ func Auth(repository repository.IAuthRepo) gin.HandlerFunc {
 }
 
 func (i *Interactor) Routes(router *gin.RouterGroup) {
-	router.POST("/user", i.CreateUser)
-	router.GET("/user", Auth(i.AuthRepo), i.ReadUsers)
-	router.GET("/user/:id", Auth(i.AuthRepo), i.ReadUser)
-	router.PUT("/user/:id", Auth(i.AuthRepo), i.UpdateUser)
-	router.DELETE("/user/:id", Auth(i.AuthRepo), i.DeleteUser)
+	router.POST("/users", i.CreateUser)
+	router.GET("/users", Auth(i.AuthRepo), i.ReadUsers)
+	router.GET("/users/:id", Auth(i.AuthRepo), i.ReadUser)
+	router.PUT("/users/:id", Auth(i.AuthRepo), i.UpdateUser)
+	router.DELETE("/users/:id", Auth(i.AuthRepo), i.DeleteUser)
+
+	router.POST("/tasks", Auth(i.AuthRepo), i.CreateTask)
+	router.GET("/tasks", Auth(i.AuthRepo), i.ReadTasks)
+	router.GET("/tasks/:id", Auth(i.AuthRepo), i.ReadTask)
+	router.PUT("/tasks/:id", Auth(i.AuthRepo), i.UpdateTask)
+	router.DELETE("/tasks/:id", Auth(i.AuthRepo), i.DeleteTask)
 }
