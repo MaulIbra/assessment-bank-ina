@@ -35,17 +35,19 @@ func Init() *gin.Engine {
 
 	v1 := router.Group("/api")
 
-	iAuthRepo := repository.NewAuthRepository(token, mySigningKey, expiredToken)
-
 	iUserRepo := repository.NewUserRepo(db)
 	iUserUsecase := usecase.NewUserUsecase(iUserRepo, passSecret)
 
 	iTaskRepo := repository.NewTaskRepo(db)
 	iTaskUsecase := usecase.NewTaskUsecase(iTaskRepo)
 
+	iAuthRepo := repository.NewAuthRepo(token, mySigningKey, expiredToken)
+	iAuthUsecase := usecase.NewAuthUsecase(iAuthRepo, iUserRepo, passSecret)
+
 	interactor := interactor.Interactor{
 		UserUsecase: iUserUsecase,
 		TaskUsecase: iTaskUsecase,
+		AuthUsecase: iAuthUsecase,
 		AuthRepo:    iAuthRepo,
 	}
 	interactor.Routes(v1)

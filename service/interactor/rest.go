@@ -11,6 +11,7 @@ import (
 type Interactor struct {
 	UserUsecase usecase.IUserUsecase
 	TaskUsecase usecase.ITaskUsecase
+	AuthUsecase usecase.IAuthUsecase
 	AuthRepo    repository.IAuthRepo
 }
 
@@ -39,6 +40,7 @@ func Auth(repository repository.IAuthRepo) gin.HandlerFunc {
 }
 
 func (i *Interactor) Routes(router *gin.RouterGroup) {
+	router.POST("/login", i.Login)
 	router.POST("/users", i.CreateUser)
 	router.GET("/users", Auth(i.AuthRepo), i.ReadUsers)
 	router.GET("/users/:id", Auth(i.AuthRepo), i.ReadUser)

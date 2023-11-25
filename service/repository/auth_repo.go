@@ -46,6 +46,6 @@ func (a authRepo) ClaimToken(token string) (map[string]interface{}, error) {
 	return nil, fmt.Errorf("not Authorize")
 }
 
-func NewAuthRepository(jwt *jwt.Token, signingKey []byte, expiredToken int) IAuthRepo {
+func NewAuthRepo(jwt *jwt.Token, signingKey []byte, expiredToken int) IAuthRepo {
 	return &authRepo{jwt: jwt, signingKey: signingKey, expiredToken: expiredToken}
 }
