@@ -1,21 +1,27 @@
 package interactor
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/MaulIbra/assessment-bank-ina/service/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func (i *Interactor) CreateTask(context *gin.Context) {
 	var wrapper models.Wrapper
 	var task models.Task
-	err := context.BindJSON(&task)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"messages": err.Error(),
-		})
+	if err := context.ShouldBindJSON(&task); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := make([]models.ErrorMsg, len(ve))
+			for i, fe := range ve {
+				out[i] = models.ErrorMsg{fe.Field(), models.GetErrorMsg(fe)}
+			}
+			context.JSON(http.StatusBadRequest, gin.H{"error": out})
+		}
 		return
 	}
 
@@ -130,11 +136,15 @@ func (i *Interactor) UpdateTask(context *gin.Context) {
 		})
 		return
 	}
-	err = context.BindJSON(&task)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"messages": err.Error(),
-		})
+	if err := context.ShouldBindJSON(&task); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := make([]models.ErrorMsg, len(ve))
+			for i, fe := range ve {
+				out[i] = models.ErrorMsg{fe.Field(), models.GetErrorMsg(fe)}
+			}
+			context.JSON(http.StatusBadRequest, gin.H{"error": out})
+		}
 		return
 	}
 

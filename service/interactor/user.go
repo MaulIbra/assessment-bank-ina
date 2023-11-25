@@ -1,24 +1,30 @@
 package interactor
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/MaulIbra/assessment-bank-ina/service/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func (i *Interactor) CreateUser(context *gin.Context) {
 	var wrapper models.Wrapper
 	var user models.User
-	err := context.BindJSON(&user)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"messages": err.Error(),
-		})
+	if err := context.ShouldBindJSON(&user); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := make([]models.ErrorMsg, len(ve))
+			for i, fe := range ve {
+				out[i] = models.ErrorMsg{fe.Field(), models.GetErrorMsg(fe)}
+			}
+			context.JSON(http.StatusBadRequest, gin.H{"error": out})
+		}
 		return
 	}
-	err = i.UserUsecase.CreateUser(&user)
+	err := i.UserUsecase.CreateUser(&user)
 	if err != nil {
 		if err.Error() == "user email already exist" {
 			context.JSON(http.StatusBadRequest, gin.H{
@@ -116,11 +122,15 @@ func (i *Interactor) UpdateUser(context *gin.Context) {
 		return
 	}
 
-	err = context.BindJSON(&user)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"messages": err.Error(),
-		})
+	if err := context.ShouldBindJSON(&user); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := make([]models.ErrorMsg, len(ve))
+			for i, fe := range ve {
+				out[i] = models.ErrorMsg{fe.Field(), models.GetErrorMsg(fe)}
+			}
+			context.JSON(http.StatusBadRequest, gin.H{"error": out})
+		}
 		return
 	}
 

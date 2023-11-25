@@ -26,6 +26,9 @@ func NewTaskUsecase(taskRepo repository.ITaskRepo) ITaskUsecase {
 }
 
 func (uu taskUsecase) CreateTask(task *models.Task) error {
+	if task.Status == "" {
+		task.Status = "PENDING"
+	}
 	return uu.taskRepo.CreateTask(task)
 }
 
@@ -49,6 +52,9 @@ func (uu taskUsecase) UpdateTask(task *models.Task) error {
 	taskTemp.Status = task.Status
 	taskTemp.Description = task.Description
 	taskTemp.UserId = task.UserId
+	if task.Status == "" {
+		taskTemp.Status = "PENDING"
+	}
 
 	err = uu.taskRepo.UpdateTask(taskTemp)
 	if err != nil {
