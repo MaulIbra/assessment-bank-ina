@@ -1,0 +1,72 @@
+version: "3.3"
+
+services:
+  assessment-bank-ina-db:
+    image: mysql:8.0.27
+    container_name: assessment-bank-ina-db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 'maulanaroot'
+      MYSQL_USER: 'maulana'
+      MYSQL_PASSWORD: 'maulana'
+      MYSQL_DATABASE: assessment_bank_ina
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '3310:3306'
+    expose:
+      - '3310'
+    volumes:
+      - assessment-bank-ina-db:/var/lib/mysql
+    networks:
+      - assessment-bank-ina-net
+    healthcheck:
+      test: mysql -umaulana -pmaulana -d assessment_bank_ina
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  assessment-bank-ina:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assessment-bank-ina
+    restart: on-failure
+    volumes:
+      - .:/assessment-bank-ina
+    environment:
+      - PORT=9010
+      - DB_NAME=assessment_bank_ina
+      - DB_USER=maulana
+      - DB_PASS=maulana
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3310
+      - EXPIRED_TIME_TOKEN=10
+      - SECRET_KEY=17c11ae94e6859e0c04daae2f55b0073d2c947294ea38b79280ed0dd514c8454
+      - PASS_SECRET=abc&1*~#^2^#s0^=)^^7%b34
+    ports:
+      - "9010:9010"
+    expose:
+      - "9010"
+    depends_on:
+      - assessment-bank-ina-db
+    networks:
+      - assessment-bank-ina-net
+    extra_hosts:
+      - host.docker.internal:host-gateway
+  assessment-bank-ina-db-migration:
+    image: migrate/migrate
+    container_name: assessment-bank-ina-db-migration
+    volumes:
+      - ./migrations:/migrations
+    command: [ "-path", "/migrations", "-database",  "mysql://maulana:maulana@tcp(assessment-bank-ina-db:3306)/assessment_bank_ina", "up" ]
+    links:
+      - assessment-bank-ina-db
+    depends_on:
+      - assessment-bank-ina-db
+    networks:
+      - assessment-bank-ina-net
+volumes:
+  assessment-bank-ina-db:
+networks:
+  assessment-bank-ina-net:
+    external: false

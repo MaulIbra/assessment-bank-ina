@@ -2,6 +2,7 @@ package interactor
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -26,6 +27,7 @@ func (i *Interactor) CreateUser(context *gin.Context) {
 	}
 	err := i.UserUsecase.CreateUser(&user)
 	if err != nil {
+		log.Println(err.Error())
 		if err.Error() == "user email already exist" {
 			context.JSON(http.StatusBadRequest, gin.H{
 				"messages": err.Error(),
@@ -40,6 +42,7 @@ func (i *Interactor) CreateUser(context *gin.Context) {
 
 	token, err := i.AuthRepo.GenerateJWT(user.ID, user.Email, user.Password)
 	if err != nil {
+		log.Println(err.Error())
 		context.JSON(http.StatusBadRequest, gin.H{
 			"messages": "something wrong in the server",
 		})

@@ -32,6 +32,10 @@ func (au authUsecase) Login(auth models.Auth) (*models.User, string, error) {
 		return nil, "", errors.New("You have entered an invalid email or password")
 	}
 
+	if user == nil {
+		return nil, "", errors.New("You have entered an invalid email or password")
+	}
+
 	pass, err := utils.Decrypt(user.Password, au.passSecret)
 	if err != nil {
 		return nil, "", err
